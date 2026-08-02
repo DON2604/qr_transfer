@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
 
+/// Visual grid showing received vs pending chunks during a QR transfer.
 class ChunkProgressGrid extends StatelessWidget {
   final int totalChunks;
   final Set<int> receivedIndices;
@@ -41,14 +42,14 @@ class ChunkProgressGrid extends StatelessWidget {
               ),
               Row(
                 children: [
-                  _legendDot(AppColors.success),
+                  _LegendDot(color: AppColors.success),
                   const SizedBox(width: 4),
                   const Text(
                     'Received',
                     style: TextStyle(color: AppColors.textMuted, fontSize: 10),
                   ),
                   const SizedBox(width: 10),
-                  _legendDot(AppColors.border),
+                  _LegendDot(color: AppColors.border),
                   const SizedBox(width: 4),
                   const Text(
                     'Pending',
@@ -68,7 +69,9 @@ class ChunkProgressGrid extends StatelessWidget {
                 width: 12,
                 height: 12,
                 decoration: BoxDecoration(
-                  color: isReceived ? AppColors.success : AppColors.surfaceElevated,
+                  color: isReceived
+                      ? AppColors.success
+                      : AppColors.surfaceElevated,
                   borderRadius: BorderRadius.circular(2),
                   border: Border.all(
                     color: isReceived ? AppColors.success : AppColors.border,
@@ -83,22 +86,26 @@ class ChunkProgressGrid extends StatelessWidget {
               padding: const EdgeInsets.only(top: 6),
               child: Text(
                 '+${totalChunks - 150} more chunks',
-                style: const TextStyle(color: AppColors.textMuted, fontSize: 10),
+                style: const TextStyle(
+                    color: AppColors.textMuted, fontSize: 10),
               ),
             ),
         ],
       ),
     );
   }
+}
 
-  Widget _legendDot(Color color) {
+class _LegendDot extends StatelessWidget {
+  final Color color;
+  const _LegendDot({required this.color});
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       width: 8,
       height: 8,
-      decoration: BoxDecoration(
-        color: color,
-        shape: BoxShape.circle,
-      ),
+      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
     );
   }
 }

@@ -11,10 +11,7 @@ import '../widgets/glass_card.dart';
 class QrScannerView extends StatefulWidget {
   final VoidCallback? onTransferSuccess;
 
-  const QrScannerView({
-    super.key,
-    this.onTransferSuccess,
-  });
+  const QrScannerView({super.key, this.onTransferSuccess});
 
   @override
   State<QrScannerView> createState() => _QrScannerViewState();
@@ -143,10 +140,15 @@ class _QrScannerViewState extends State<QrScannerView> {
                     Positioned(
                       top: 16,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.background.withValues(alpha: 0.85),
-                          borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                          borderRadius: BorderRadius.circular(
+                            AppTheme.radiusSm,
+                          ),
                           border: Border.all(color: AppColors.border),
                         ),
                         child: Text(
@@ -218,7 +220,9 @@ class _QrScannerViewState extends State<QrScannerView> {
                         Text(
                           '${(_decoder.progress * 100).toStringAsFixed(0)}%',
                           style: TextStyle(
-                            color: _decoder.isComplete ? AppColors.success : AppColors.primary,
+                            color: _decoder.isComplete
+                                ? AppColors.success
+                                : AppColors.primary,
                             fontWeight: FontWeight.w600,
                             fontSize: 14,
                           ),
@@ -231,7 +235,9 @@ class _QrScannerViewState extends State<QrScannerView> {
                       child: LinearProgressIndicator(
                         value: _decoder.progress,
                         minHeight: 4,
-                        color: _decoder.isComplete ? AppColors.success : AppColors.primary,
+                        color: _decoder.isComplete
+                            ? AppColors.success
+                            : AppColors.primary,
                       ),
                     ),
                   ],
@@ -259,7 +265,11 @@ class _QrScannerViewState extends State<QrScannerView> {
               children: [
                 const Row(
                   children: [
-                    Icon(Icons.check_circle_outline, color: AppColors.success, size: 22),
+                    Icon(
+                      Icons.check_circle_outline,
+                      color: AppColors.success,
+                      size: 22,
+                    ),
                     SizedBox(width: 10),
                     Text(
                       'Transfer complete',
@@ -285,14 +295,19 @@ class _QrScannerViewState extends State<QrScannerView> {
                 const SizedBox(height: 4),
                 Text(
                   '${_formatSize(_savedFileInfo!.fileSize)} · SHA-256 verified',
-                  style: const TextStyle(color: AppColors.success, fontSize: 12),
+                  style: const TextStyle(
+                    color: AppColors.success,
+                    fontSize: 12,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 Row(
                   children: [
                     Expanded(
                       child: FilledButton.icon(
-                        onPressed: () => FileStorageService.openFile(_savedFileInfo!.filePath),
+                        onPressed: () => FileStorageService.openFile(
+                          _savedFileInfo!.filePath,
+                        ),
                         icon: const Icon(Icons.open_in_new, size: 18),
                         label: const Text('Open file'),
                       ),
@@ -300,7 +315,9 @@ class _QrScannerViewState extends State<QrScannerView> {
                     const SizedBox(width: 10),
                     Expanded(
                       child: OutlinedButton.icon(
-                        onPressed: () => FileStorageService.shareFile(_savedFileInfo!.filePath),
+                        onPressed: () => FileStorageService.shareFile(
+                          _savedFileInfo!.filePath,
+                        ),
                         icon: const Icon(Icons.share_outlined, size: 18),
                         label: const Text('Share'),
                       ),
@@ -324,7 +341,11 @@ class _QrScannerViewState extends State<QrScannerView> {
             backgroundColor: AppColors.error.withValues(alpha: 0.06),
             child: Column(
               children: [
-                const Icon(Icons.error_outline, color: AppColors.error, size: 32),
+                const Icon(
+                  Icons.error_outline,
+                  color: AppColors.error,
+                  size: 32,
+                ),
                 const SizedBox(height: 8),
                 const Text(
                   'Transfer failed',
@@ -336,13 +357,18 @@ class _QrScannerViewState extends State<QrScannerView> {
                 const SizedBox(height: 4),
                 Text(
                   _assemblyError!,
-                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                  style: const TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 12,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 12),
                 FilledButton(
                   onPressed: _resetScanner,
-                  style: FilledButton.styleFrom(backgroundColor: AppColors.error),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.error,
+                  ),
                   child: const Text('Try again'),
                 ),
               ],

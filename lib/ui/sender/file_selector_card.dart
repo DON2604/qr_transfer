@@ -25,10 +25,7 @@ class SelectedFileInfo {
 class FileSelectorCard extends StatefulWidget {
   final Function(SelectedFileInfo info) onFileSelected;
 
-  const FileSelectorCard({
-    super.key,
-    required this.onFileSelected,
-  });
+  const FileSelectorCard({super.key, required this.onFileSelected});
 
   @override
   State<FileSelectorCard> createState() => _FileSelectorCardState();
@@ -41,9 +38,7 @@ class _FileSelectorCardState extends State<FileSelectorCard> {
   Future<void> _pickFile({FileType type = FileType.any}) async {
     setState(() => _isLoading = true);
     try {
-      final result = await FilePicker.pickFiles(
-        type: type,
-      );
+      final result = await FilePicker.pickFiles(type: type);
 
       if (result != null && result.files.isNotEmpty) {
         final platformFile = result.files.first;
@@ -65,7 +60,14 @@ class _FileSelectorCardState extends State<FileSelectorCard> {
           String category = 'doc';
           if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].contains(ext)) {
             category = 'image';
-          } else if (['mp3', 'wav', 'aac', 'm4a', 'flac', 'ogg'].contains(ext)) {
+          } else if ([
+            'mp3',
+            'wav',
+            'aac',
+            'm4a',
+            'flac',
+            'ogg',
+          ].contains(ext)) {
             category = 'audio';
           } else if (['mp4', 'mkv', 'avi', 'mov', 'webm'].contains(ext)) {
             category = 'video';
@@ -149,10 +151,7 @@ class _FileSelectorCardState extends State<FileSelectorCard> {
           const SizedBox(height: 4),
           const Text(
             'Choose a file type or browse any file',
-            style: TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 13,
-            ),
+            style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
           ),
           const SizedBox(height: 16),
           Row(
@@ -196,9 +195,7 @@ class _FileSelectorCardState extends State<FileSelectorCard> {
           ),
           if (_isLoading) ...[
             const SizedBox(height: 20),
-            const Center(
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
+            const Center(child: CircularProgressIndicator(strokeWidth: 2)),
           ] else if (_selectedFile != null) ...[
             const SizedBox(height: 16),
             Container(
@@ -213,7 +210,9 @@ class _FileSelectorCardState extends State<FileSelectorCard> {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: _getCategoryColor(_selectedFile!.category).withValues(alpha: 0.1),
+                      color: _getCategoryColor(
+                        _selectedFile!.category,
+                      ).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(AppTheme.radiusSm),
                     ),
                     child: Icon(
@@ -252,7 +251,11 @@ class _FileSelectorCardState extends State<FileSelectorCard> {
                     onPressed: () {
                       setState(() => _selectedFile = null);
                     },
-                    icon: const Icon(Icons.close, color: AppColors.textMuted, size: 20),
+                    icon: const Icon(
+                      Icons.close,
+                      color: AppColors.textMuted,
+                      size: 20,
+                    ),
                     visualDensity: VisualDensity.compact,
                   ),
                 ],

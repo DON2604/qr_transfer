@@ -1,5 +1,7 @@
 # AirTransfer QR
 
+![Android CI](https://github.com/<your-username>/qr_transfer/actions/workflows/android.yml/badge.svg)
+
 Transfer files between devices using nothing but a camera and a screen — no Wi-Fi, no Bluetooth, no cables, no internet.
 
 AirTransfer QR encodes any file into an animated stream of QR codes and reassembles it on the receiving device after scanning every frame. Because the channel is purely optical, it works across air-gapped networks and in environments where radio communication is restricted or unavailable.
@@ -157,9 +159,29 @@ flutter run
 
 # Build release APK
 flutter build apk --release
+
+# Build smaller split APKs per ABI (arm64-v8a, armeabi-v7a, x86_64)
+flutter build apk --release --split-per-abi
 ```
 
 Camera permission is required on the Receive tab. The app will prompt for it automatically on first use.
+
+---
+
+## CI / CD
+
+The workflow at `.github/workflows/android.yml` runs automatically on every push and pull request.
+
+| Trigger | What runs |
+|---|---|
+| Pull request to `main` / `master` | `flutter analyze` + debug APK |
+| Push to `main` / `master` | analyze + debug APK + release APK + ABI splits |
+| Version tag (`v*`) | Everything above, plus a GitHub Release with APKs attached |
+| Manual (`workflow_dispatch`) | Full build on demand from the Actions tab |
+
+Artifacts are kept for 14 days (debug) or 30 days (release) and are downloadable from the Actions run page.
+
+**To add proper release signing**, store your keystore as a base64-encoded repository secret and decode it in the workflow before the `flutter build apk --release` step. The build currently uses the debug keystore, which is fine for internal testing but not for Play Store submission.
 
 ---
 

@@ -5,6 +5,7 @@ import '../../models/transfer_file_info.dart';
 import '../../services/file_storage_service.dart';
 import '../../services/qr_decoder_service.dart';
 import '../receiver/chunk_progress_grid.dart';
+import '../theme/app_theme.dart';
 import '../widgets/glass_card.dart';
 
 class QrScannerView extends StatefulWidget {
@@ -20,8 +21,6 @@ class QrScannerView extends StatefulWidget {
 }
 
 class _QrScannerViewState extends State<QrScannerView> {
-  static const Color emeraldColor = Color(0xFF10B981);
-
   final MobileScannerController _cameraController = MobileScannerController(
     detectionSpeed: DetectionSpeed.unrestricted,
     returnImage: false,
@@ -49,7 +48,6 @@ class _QrScannerViewState extends State<QrScannerView> {
         if (didAdd && mounted) {
           setState(() {});
 
-          // Check if completion reached
           if (_decoder.isComplete && !_isProcessingSuccess) {
             _handleTransferCompletion();
           }
@@ -108,82 +106,70 @@ class _QrScannerViewState extends State<QrScannerView> {
 
   @override
   Widget build(BuildContext context) {
+    final hasProgress = _decoder.countReceived > 0;
+    final frameColor = hasProgress ? AppColors.success : AppColors.primary;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Camera View Card
         GlassCard(
           padding: EdgeInsets.zero,
           child: Column(
             children: [
-              // Camera frame viewport
               SizedBox(
                 height: 320,
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
                     ClipRRect(
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(AppTheme.radiusMd - 1),
+                      ),
                       child: MobileScanner(
                         controller: _cameraController,
                         onDetect: _onDetect,
                       ),
                     ),
 
-                    // Target scanning frame overlay
                     Container(
-                      width: 240,
-                      height: 240,
+                      width: 220,
+                      height: 220,
                       decoration: BoxDecoration(
-                        border: Border.all(
-                          color: _decoder.countReceived > 0 ? emeraldColor : Colors.cyanAccent,
-                          width: 2.5,
-                        ),
-                        borderRadius: BorderRadius.circular(24),
-                        boxShadow: [
-                          BoxShadow(
-                            color: (_decoder.countReceived > 0 ? emeraldColor : Colors.cyanAccent)
-                                .withValues(alpha: 0.3),
-                            blurRadius: 20,
-                            spreadRadius: 2,
-                          ),
-                        ],
+                        border: Border.all(color: frameColor, width: 2),
+                        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                       ),
                     ),
 
-                    // Top scan instruction chip
                     Positioned(
                       top: 16,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.7),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: Colors.white24),
+                          color: AppColors.background.withValues(alpha: 0.85),
+                          borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                          border: Border.all(color: AppColors.border),
                         ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.qr_code_scanner_rounded, color: Colors.cyanAccent, size: 16),
-                            const SizedBox(width: 6),
-                            Text(
-                              _decoder.metadata != null
-                                  ? 'Scanning: ${_decoder.metadata!.fileName}'
-                                  : 'Align Sender QR Code inside box',
-                              style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
-                            ),
-                          ],
+                        child: Text(
+                          _decoder.metadata != null
+                              ? 'Scanning: ${_decoder.metadata!.fileName}'
+                              : 'Align QR code within frame',
+                          style: const TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
                     ),
 
-                    // Camera Controls Overlay
                     Positioned(
                       bottom: 12,
                       right: 12,
                       child: Container(
                         decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.6),
+                          color: AppColors.background.withValues(alpha: 0.7),
                           shape: BoxShape.circle,
+                          border: Border.all(color: AppColors.border),
                         ),
                         child: IconButton(
                           onPressed: () => _cameraController.toggleTorch(),
@@ -192,10 +178,18 @@ class _QrScannerViewState extends State<QrScannerView> {
                             builder: (context, state, child) {
                               switch (state.torchState) {
                                 case TorchState.on:
-                                  return const Icon(Icons.flash_on_rounded, color: Colors.amberAccent);
+                                  return const Icon(
+                                    Icons.flash_on,
+                                    color: AppColors.warning,
+                                    size: 20,
+                                  );
                                 case TorchState.off:
                                 default:
-                                  return const Icon(Icons.flash_off_rounded, color: Colors.white);
+                                  return const Icon(
+                                    Icons.flash_off,
+                                    color: AppColors.textSecondary,
+                                    size: 20,
+                                  );
                               }
                             },
                           ),
@@ -206,7 +200,6 @@ class _QrScannerViewState extends State<QrScannerView> {
                 ),
               ),
 
-              // Progress Section below camera
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
@@ -215,22 +208,31 @@ class _QrScannerViewState extends State<QrScannerView> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Captured: ${_decoder.countReceived} / ${_decoder.totalChunks > 0 ? _decoder.totalChunks : "?"} Chunks',
-                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                          '${_decoder.countReceived} / ${_decoder.totalChunks > 0 ? _decoder.totalChunks : "?"} chunks',
+                          style: const TextStyle(
+                            color: AppColors.textPrimary,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 13,
+                          ),
                         ),
                         Text(
                           '${(_decoder.progress * 100).toStringAsFixed(0)}%',
-                          style: const TextStyle(color: Colors.cyanAccent, fontWeight: FontWeight.bold, fontSize: 16),
+                          style: TextStyle(
+                            color: _decoder.isComplete ? AppColors.success : AppColors.primary,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 8),
-                    LinearProgressIndicator(
-                      value: _decoder.progress,
-                      backgroundColor: Colors.white10,
-                      color: _decoder.isComplete ? emeraldColor : Colors.cyanAccent,
-                      minHeight: 8,
-                      borderRadius: BorderRadius.circular(4),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(2),
+                      child: LinearProgressIndicator(
+                        value: _decoder.progress,
+                        minHeight: 4,
+                        color: _decoder.isComplete ? AppColors.success : AppColors.primary,
+                      ),
                     ),
                   ],
                 ),
@@ -241,31 +243,30 @@ class _QrScannerViewState extends State<QrScannerView> {
 
         const SizedBox(height: 16),
 
-        // Live Chunk Grid Matrix Visualizer
         if (_decoder.totalChunks > 0)
           ChunkProgressGrid(
             totalChunks: _decoder.totalChunks,
             receivedIndices: _decoder.receivedChunks.keys.toSet(),
           ),
 
-        // Transfer Complete Card / Modal
         if (_savedFileInfo != null) ...[
           const SizedBox(height: 16),
           GlassCard(
-            borderColor: emeraldColor,
-            backgroundColor: emeraldColor.withValues(alpha: 0.1),
+            borderColor: AppColors.success.withValues(alpha: 0.4),
+            backgroundColor: AppColors.success.withValues(alpha: 0.06),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const Row(
                   children: [
-                    Icon(Icons.verified_user_rounded, color: emeraldColor, size: 28),
+                    Icon(Icons.check_circle_outline, color: AppColors.success, size: 22),
                     SizedBox(width: 10),
                     Text(
-                      'Transfer Verified & Saved!',
+                      'Transfer complete',
                       style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ],
@@ -275,72 +276,74 @@ class _QrScannerViewState extends State<QrScannerView> {
                   _savedFileInfo!.fileName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: Colors.white70, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 14,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Size: ${_formatSize(_savedFileInfo!.fileSize)} • SHA-256 Verified',
-                  style: const TextStyle(color: emeraldColor, fontSize: 12),
+                  '${_formatSize(_savedFileInfo!.fileSize)} · SHA-256 verified',
+                  style: const TextStyle(color: AppColors.success, fontSize: 12),
                 ),
                 const SizedBox(height: 16),
                 Row(
                   children: [
                     Expanded(
-                      child: ElevatedButton.icon(
+                      child: FilledButton.icon(
                         onPressed: () => FileStorageService.openFile(_savedFileInfo!.filePath),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: emeraldColor,
-                          foregroundColor: Colors.black,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                        ),
-                        icon: const Icon(Icons.open_in_new_rounded),
-                        label: const Text('Open File', style: TextStyle(fontWeight: FontWeight.bold)),
+                        icon: const Icon(Icons.open_in_new, size: 18),
+                        label: const Text('Open file'),
                       ),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: () => FileStorageService.shareFile(_savedFileInfo!.filePath),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          side: const BorderSide(color: emeraldColor),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                        ),
-                        icon: const Icon(Icons.share_rounded),
+                        icon: const Icon(Icons.share_outlined, size: 18),
                         label: const Text('Share'),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
-                TextButton.icon(
+                const SizedBox(height: 8),
+                TextButton(
                   onPressed: _resetScanner,
-                  icon: const Icon(Icons.qr_code_scanner_rounded, color: Colors.cyanAccent),
-                  label: const Text('Scan Another File', style: TextStyle(color: Colors.cyanAccent)),
+                  child: const Text('Scan another file'),
                 ),
               ],
             ),
           ),
         ],
 
-        // Error message if assembly/integrity fails
         if (_assemblyError != null) ...[
           const SizedBox(height: 16),
           GlassCard(
-            borderColor: Colors.redAccent,
-            backgroundColor: Colors.redAccent.withValues(alpha: 0.1),
+            borderColor: AppColors.error.withValues(alpha: 0.4),
+            backgroundColor: AppColors.error.withValues(alpha: 0.06),
             child: Column(
               children: [
-                const Icon(Icons.error_outline_rounded, color: Colors.redAccent, size: 36),
+                const Icon(Icons.error_outline, color: AppColors.error, size: 32),
                 const SizedBox(height: 8),
-                const Text('Transfer Error', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                const Text(
+                  'Transfer failed',
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
                 const SizedBox(height: 4),
-                Text(_assemblyError!, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                Text(
+                  _assemblyError!,
+                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                  textAlign: TextAlign.center,
+                ),
                 const SizedBox(height: 12),
-                ElevatedButton(
+                FilledButton(
                   onPressed: _resetScanner,
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
-                  child: const Text('Reset & Try Again'),
+                  style: FilledButton.styleFrom(backgroundColor: AppColors.error),
+                  child: const Text('Try again'),
                 ),
               ],
             ),

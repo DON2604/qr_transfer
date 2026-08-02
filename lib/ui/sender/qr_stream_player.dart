@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../services/qr_encoder_service.dart';
 import '../sender/file_selector_card.dart';
+import '../theme/app_theme.dart';
 import '../widgets/glass_card.dart';
 
 class QrStreamPlayer extends StatefulWidget {
@@ -22,8 +23,8 @@ class _QrStreamPlayerState extends State<QrStreamPlayer> {
   Timer? _timer;
   int _currentFrame = 0;
   bool _isPlaying = true;
-  int _fps = 8; // Default 8 frames per second
-  int _chunkSize = 350; // Default 350 bytes per chunk
+  int _fps = 8;
+  int _chunkSize = 350;
 
   @override
   void initState() {
@@ -77,9 +78,9 @@ class _QrStreamPlayerState extends State<QrStreamPlayer> {
   void _nextFrame() {
     setState(() {
       _isPlaying = false;
-      _timer?.cancel();
-      _currentFrame = (_currentFrame + 1) % _package.totalFrames;
     });
+    _timer?.cancel();
+    _currentFrame = (_currentFrame + 1) % _package.totalFrames;
   }
 
   @override
@@ -95,64 +96,57 @@ class _QrStreamPlayerState extends State<QrStreamPlayer> {
 
     return GlassCard(
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Header info & Status badge
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    widget.fileInfo.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '${_package.chunks.length} Chunks • Hash: ${_package.metadata.hash.substring(0, 8)}...',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.6),
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(
-                  color: isHeader
-                      ? Colors.amberAccent.withValues(alpha: 0.2)
-                      : Colors.cyanAccent.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: isHeader ? Colors.amberAccent : Colors.cyanAccent,
-                  ),
-                ),
-                child: Row(
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(
-                      isHeader ? Icons.subtitles_rounded : Icons.numbers_rounded,
-                      size: 14,
-                      color: isHeader ? Colors.amberAccent : Colors.cyanAccent,
-                    ),
-                    const SizedBox(width: 4),
                     Text(
-                      isHeader
-                          ? 'HEADER'
-                          : 'CHUNK $_currentFrame/${_package.chunks.length}',
-                      style: TextStyle(
-                        color: isHeader ? Colors.amberAccent : Colors.cyanAccent,
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
+                      widget.fileInfo.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${_package.chunks.length} chunks · ${_package.metadata.hash.substring(0, 8)}…',
+                      style: const TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 12,
                       ),
                     ),
                   ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: (isHeader ? AppColors.warning : AppColors.primary)
+                      .withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                  border: Border.all(
+                    color: (isHeader ? AppColors.warning : AppColors.primary)
+                        .withValues(alpha: 0.4),
+                  ),
+                ),
+                child: Text(
+                  isHeader
+                      ? 'Header'
+                      : 'Chunk $_currentFrame/${_package.chunks.length}',
+                  style: TextStyle(
+                    color: isHeader ? AppColors.warning : AppColors.primary,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],
@@ -160,22 +154,13 @@ class _QrStreamPlayerState extends State<QrStreamPlayer> {
 
           const SizedBox(height: 20),
 
-          // Animated Glowing QR Container
           Center(
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: isHeader
-                        ? Colors.amberAccent.withValues(alpha: 0.6)
-                        : Colors.cyanAccent.withValues(alpha: 0.6),
-                    blurRadius: 25,
-                    spreadRadius: 2,
-                  ),
-                ],
+                borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                border: Border.all(color: AppColors.border),
               ),
               child: QrImageView(
                 data: payload,
@@ -189,63 +174,77 @@ class _QrStreamPlayerState extends State<QrStreamPlayer> {
 
           const SizedBox(height: 20),
 
-          // Frame Progress Bar
-          LinearProgressIndicator(
-            value: _package.totalFrames > 0
-                ? (_currentFrame + 1) / _package.totalFrames
-                : 0,
-            backgroundColor: Colors.white10,
-            color: isHeader ? Colors.amberAccent : Colors.cyanAccent,
-            minHeight: 4,
-            borderRadius: BorderRadius.circular(4),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(2),
+            child: LinearProgressIndicator(
+              value: _package.totalFrames > 0
+                  ? (_currentFrame + 1) / _package.totalFrames
+                  : 0,
+              minHeight: 3,
+            ),
           ),
 
           const SizedBox(height: 20),
 
-          // Control Buttons (Play, Pause, Step)
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              IconButton.filledTonal(
+              IconButton.outlined(
                 onPressed: () {
                   setState(() {
                     _currentFrame = 0;
                   });
                 },
-                icon: const Icon(Icons.replay_rounded),
-                tooltip: 'Restart Stream',
+                icon: const Icon(Icons.replay, size: 20),
+                tooltip: 'Restart',
               ),
-              const SizedBox(width: 16),
-              FloatingActionButton.large(
+              const SizedBox(width: 12),
+              FilledButton(
                 onPressed: _togglePlayPause,
-                backgroundColor: _isPlaying ? Colors.pinkAccent : Colors.cyanAccent,
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                  ),
+                ),
                 child: Icon(
-                  _isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-                  size: 40,
-                  color: Colors.black,
+                  _isPlaying ? Icons.pause : Icons.play_arrow,
+                  size: 28,
                 ),
               ),
-              const SizedBox(width: 16),
-              IconButton.filledTonal(
+              const SizedBox(width: 12),
+              IconButton.outlined(
                 onPressed: _nextFrame,
-                icon: const Icon(Icons.skip_next_rounded),
-                tooltip: 'Next Frame',
+                icon: const Icon(Icons.skip_next, size: 20),
+                tooltip: 'Next frame',
               ),
             ],
           ),
 
           const SizedBox(height: 24),
-          const Divider(color: Colors.white12),
-          const SizedBox(height: 12),
+          const Divider(height: 1),
+          const SizedBox(height: 16),
 
-          // Stream Speed & Chunk Settings
           Row(
             children: [
-              const Icon(Icons.speed_rounded, color: Colors.cyanAccent, size: 20),
+              const Text(
+                'Speed',
+                style: TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
               const SizedBox(width: 8),
               Text(
-                'Speed: $_fps FPS',
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                '$_fps FPS',
+                style: const TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               Expanded(
                 child: Slider(
@@ -253,9 +252,6 @@ class _QrStreamPlayerState extends State<QrStreamPlayer> {
                   min: 2,
                   max: 15,
                   divisions: 13,
-                  activeColor: Colors.cyanAccent,
-                  inactiveColor: Colors.white12,
-                  label: '$_fps FPS',
                   onChanged: (val) {
                     setState(() {
                       _fps = val.toInt();
@@ -269,24 +265,26 @@ class _QrStreamPlayerState extends State<QrStreamPlayer> {
 
           Row(
             children: [
-              const Icon(Icons.data_array_rounded, color: Colors.amberAccent, size: 20),
-              const SizedBox(width: 8),
               const Text(
-                'Chunk Density:',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                'Chunk size',
+                style: TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
               const SizedBox(width: 12),
-              Wrap(
-                spacing: 8,
-                children: [200, 350, 500].map((size) {
-                  final selected = _chunkSize == size;
-                  return ChoiceChip(
+              ...[200, 350, 500].map((size) {
+                final selected = _chunkSize == size;
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: ChoiceChip(
                     label: Text('${size}B'),
                     selected: selected,
-                    selectedColor: Colors.amberAccent,
                     labelStyle: TextStyle(
-                      color: selected ? Colors.black : Colors.white,
-                      fontWeight: FontWeight.bold,
+                      color: selected ? Colors.white : AppColors.textSecondary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
                     ),
                     onSelected: (sel) {
                       if (sel) {
@@ -296,9 +294,9 @@ class _QrStreamPlayerState extends State<QrStreamPlayer> {
                         _encodeAndStart();
                       }
                     },
-                  );
-                }).toList(),
-              ),
+                  ),
+                );
+              }),
             ],
           ),
         ],

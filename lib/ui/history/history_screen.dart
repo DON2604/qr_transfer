@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/transfer_file_info.dart';
 import '../../services/file_storage_service.dart';
+import '../theme/app_theme.dart';
 import '../widgets/glass_card.dart';
 
 class HistoryScreen extends StatefulWidget {
@@ -11,7 +12,6 @@ class HistoryScreen extends StatefulWidget {
 }
 
 class _HistoryScreenState extends State<HistoryScreen> {
-  static const Color emeraldColor = Color(0xFF10B981);
   List<TransferFileInfo> _history = [];
   bool _isLoading = true;
 
@@ -40,24 +40,26 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   IconData _getFileIcon(String fileName) {
     final ext = fileName.split('.').last.toLowerCase();
-    if (['jpg', 'jpeg', 'png', 'gif', 'webp'].contains(ext)) return Icons.image_rounded;
-    if (['mp3', 'wav', 'm4a', 'flac'].contains(ext)) return Icons.audiotrack_rounded;
-    if (['mp4', 'mkv', 'avi', 'mov'].contains(ext)) return Icons.movie_rounded;
-    return Icons.insert_drive_file_rounded;
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp'].contains(ext)) return Icons.image_outlined;
+    if (['mp3', 'wav', 'm4a', 'flac'].contains(ext)) return Icons.audiotrack_outlined;
+    if (['mp4', 'mkv', 'avi', 'mov'].contains(ext)) return Icons.videocam_outlined;
+    return Icons.insert_drive_file_outlined;
   }
 
   Color _getFileColor(String fileName) {
     final ext = fileName.split('.').last.toLowerCase();
-    if (['jpg', 'jpeg', 'png', 'gif', 'webp'].contains(ext)) return Colors.pinkAccent;
-    if (['mp3', 'wav', 'm4a', 'flac'].contains(ext)) return Colors.cyanAccent;
-    if (['mp4', 'mkv', 'avi', 'mov'].contains(ext)) return Colors.amberAccent;
-    return Colors.purpleAccent;
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp'].contains(ext)) return AppColors.categoryImage;
+    if (['mp3', 'wav', 'm4a', 'flac'].contains(ext)) return AppColors.categoryAudio;
+    if (['mp4', 'mkv', 'avi', 'mov'].contains(ext)) return AppColors.categoryVideo;
+    return AppColors.categoryDoc;
   }
 
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator(color: Colors.cyanAccent));
+      return const Center(
+        child: CircularProgressIndicator(strokeWidth: 2),
+      );
     }
 
     if (_history.isEmpty) {
@@ -67,17 +69,28 @@ class _HistoryScreenState extends State<HistoryScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.history_rounded, size: 64, color: Colors.white.withValues(alpha: 0.3)),
+              Icon(
+                Icons.folder_open_outlined,
+                size: 48,
+                color: AppColors.textMuted.withValues(alpha: 0.5),
+              ),
               const SizedBox(height: 16),
               const Text(
-                'No Transferred Files Yet',
-                style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                'No transferred files',
+                style: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               const SizedBox(height: 8),
-              Text(
-                'Files received via Optical QR scanner will be listed here automatically.',
+              const Text(
+                'Files received via QR scanner will appear here.',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 13),
+                style: TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 13,
+                ),
               ),
             ],
           ),
@@ -87,29 +100,28 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
     return RefreshIndicator(
       onRefresh: _loadHistory,
-      color: Colors.cyanAccent,
       child: ListView.separated(
         padding: const EdgeInsets.only(bottom: 24),
         itemCount: _history.length,
-        separatorBuilder: (context, index) => const SizedBox(height: 12),
+        separatorBuilder: (context, index) => const SizedBox(height: 8),
         itemBuilder: (context, index) {
           final item = _history[index];
           final color = _getFileColor(item.fileName);
           final icon = _getFileIcon(item.fileName);
 
           return GlassCard(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(14),
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.2),
-                    shape: BoxShape.circle,
+                    color: color.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(AppTheme.radiusSm),
                   ),
-                  child: Icon(icon, color: color, size: 26),
+                  child: Icon(icon, color: color, size: 20),
                 ),
-                const SizedBox(width: 14),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -119,16 +131,16 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
+                          color: AppColors.textPrimary,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 2),
                       Text(
-                        'Size: ${_formatSize(item.fileSize)} • ${item.receivedAt.day}/${item.receivedAt.month} ${item.receivedAt.hour}:${item.receivedAt.minute.toString().padLeft(2, '0')}',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.6),
+                        '${_formatSize(item.fileSize)} · ${item.receivedAt.day}/${item.receivedAt.month} ${item.receivedAt.hour}:${item.receivedAt.minute.toString().padLeft(2, '0')}',
+                        style: const TextStyle(
+                          color: AppColors.textSecondary,
                           fontSize: 12,
                         ),
                       ),
@@ -136,8 +148,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   ),
                 ),
                 PopupMenuButton<String>(
-                  icon: const Icon(Icons.more_vert_rounded, color: Colors.white70),
-                  color: const Color(0xFF1E293B),
+                  icon: const Icon(Icons.more_vert, color: AppColors.textSecondary, size: 20),
+                  color: AppColors.surfaceElevated,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                    side: const BorderSide(color: AppColors.border),
+                  ),
                   onSelected: (val) async {
                     if (val == 'open') {
                       await FileStorageService.openFile(item.filePath);
@@ -153,9 +169,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       value: 'open',
                       child: Row(
                         children: [
-                          Icon(Icons.open_in_new_rounded, color: Colors.cyanAccent, size: 18),
+                          Icon(Icons.open_in_new, color: AppColors.primary, size: 18),
                           SizedBox(width: 8),
-                          Text('Open File', style: TextStyle(color: Colors.white)),
+                          Text('Open', style: TextStyle(color: AppColors.textPrimary)),
                         ],
                       ),
                     ),
@@ -163,9 +179,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       value: 'share',
                       child: Row(
                         children: [
-                          Icon(Icons.share_rounded, color: emeraldColor, size: 18),
+                          Icon(Icons.share_outlined, color: AppColors.textSecondary, size: 18),
                           SizedBox(width: 8),
-                          Text('Share', style: TextStyle(color: Colors.white)),
+                          Text('Share', style: TextStyle(color: AppColors.textPrimary)),
                         ],
                       ),
                     ),
@@ -173,9 +189,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       value: 'delete',
                       child: Row(
                         children: [
-                          Icon(Icons.delete_rounded, color: Colors.redAccent, size: 18),
+                          Icon(Icons.delete_outline, color: AppColors.error, size: 18),
                           SizedBox(width: 8),
-                          Text('Delete', style: TextStyle(color: Colors.redAccent)),
+                          Text('Delete', style: TextStyle(color: AppColors.error)),
                         ],
                       ),
                     ),

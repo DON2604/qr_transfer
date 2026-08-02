@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
+import '../theme/app_theme.dart';
 import '../widgets/glass_card.dart';
 
 class SelectedFileInfo {
@@ -90,7 +91,7 @@ class _FileSelectorCardState extends State<FileSelectorCard> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error selecting file: $e'),
-            backgroundColor: Colors.redAccent,
+            backgroundColor: AppColors.error,
           ),
         );
       }
@@ -108,26 +109,26 @@ class _FileSelectorCardState extends State<FileSelectorCard> {
   IconData _getCategoryIcon(String cat) {
     switch (cat) {
       case 'image':
-        return Icons.image_rounded;
+        return Icons.image_outlined;
       case 'audio':
-        return Icons.audiotrack_rounded;
+        return Icons.audiotrack_outlined;
       case 'video':
-        return Icons.videocam_rounded;
+        return Icons.videocam_outlined;
       default:
-        return Icons.insert_drive_file_rounded;
+        return Icons.insert_drive_file_outlined;
     }
   }
 
   Color _getCategoryColor(String cat) {
     switch (cat) {
       case 'image':
-        return Colors.pinkAccent;
+        return AppColors.categoryImage;
       case 'audio':
-        return Colors.cyanAccent;
+        return AppColors.categoryAudio;
       case 'video':
-        return Colors.amberAccent;
+        return AppColors.categoryVideo;
       default:
-        return Colors.purpleAccent;
+        return AppColors.categoryDoc;
     }
   }
 
@@ -137,29 +138,30 @@ class _FileSelectorCardState extends State<FileSelectorCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Row(
-            children: [
-              Icon(Icons.upload_file_rounded, color: Colors.cyanAccent, size: 24),
-              SizedBox(width: 10),
-              Text(
-                'Select Media or File to Transfer',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
+          const Text(
+            'Select file to transfer',
+            style: TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            'Choose a file type or browse any file',
+            style: TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 13,
+            ),
           ),
           const SizedBox(height: 16),
-          // Category Selectors
           Row(
             children: [
               Expanded(
                 child: _buildCategoryBtn(
                   label: 'Image',
-                  icon: Icons.photo_library_rounded,
-                  color: Colors.pinkAccent,
+                  icon: Icons.photo_library_outlined,
+                  color: AppColors.categoryImage,
                   onTap: () => _pickFile(type: FileType.image),
                 ),
               ),
@@ -167,8 +169,8 @@ class _FileSelectorCardState extends State<FileSelectorCard> {
               Expanded(
                 child: _buildCategoryBtn(
                   label: 'Audio',
-                  icon: Icons.music_note_rounded,
-                  color: Colors.cyanAccent,
+                  icon: Icons.music_note_outlined,
+                  color: AppColors.categoryAudio,
                   onTap: () => _pickFile(type: FileType.audio),
                 ),
               ),
@@ -176,8 +178,8 @@ class _FileSelectorCardState extends State<FileSelectorCard> {
               Expanded(
                 child: _buildCategoryBtn(
                   label: 'Video',
-                  icon: Icons.movie_rounded,
-                  color: Colors.amberAccent,
+                  icon: Icons.movie_outlined,
+                  color: AppColors.categoryVideo,
                   onTap: () => _pickFile(type: FileType.video),
                 ),
               ),
@@ -185,43 +187,42 @@ class _FileSelectorCardState extends State<FileSelectorCard> {
               Expanded(
                 child: _buildCategoryBtn(
                   label: 'File',
-                  icon: Icons.folder_open_rounded,
-                  color: Colors.purpleAccent,
+                  icon: Icons.folder_open_outlined,
+                  color: AppColors.categoryDoc,
                   onTap: () => _pickFile(type: FileType.any),
                 ),
               ),
             ],
           ),
-
           if (_isLoading) ...[
             const SizedBox(height: 20),
             const Center(
-              child: CircularProgressIndicator(color: Colors.cyanAccent),
+              child: CircularProgressIndicator(strokeWidth: 2),
             ),
           ] else if (_selectedFile != null) ...[
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
             Container(
-              padding: const EdgeInsets.all(14),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: _getCategoryColor(_selectedFile!.category).withValues(alpha: 0.4)),
+                color: AppColors.surfaceElevated,
+                borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                border: Border.all(color: AppColors.border),
               ),
               child: Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: _getCategoryColor(_selectedFile!.category).withValues(alpha: 0.2),
-                      shape: BoxShape.circle,
+                      color: _getCategoryColor(_selectedFile!.category).withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusSm),
                     ),
                     child: Icon(
                       _getCategoryIcon(_selectedFile!.category),
                       color: _getCategoryColor(_selectedFile!.category),
-                      size: 28,
+                      size: 22,
                     ),
                   ),
-                  const SizedBox(width: 14),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -231,16 +232,16 @@ class _FileSelectorCardState extends State<FileSelectorCard> {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
+                            color: AppColors.textPrimary,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 14,
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 2),
                         Text(
-                          'Size: ${_formatSize(_selectedFile!.size)} • Type: ${_selectedFile!.category.toUpperCase()}',
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.6),
+                          '${_formatSize(_selectedFile!.size)} · ${_selectedFile!.category}',
+                          style: const TextStyle(
+                            color: AppColors.textSecondary,
                             fontSize: 12,
                           ),
                         ),
@@ -251,7 +252,8 @@ class _FileSelectorCardState extends State<FileSelectorCard> {
                     onPressed: () {
                       setState(() => _selectedFile = null);
                     },
-                    icon: const Icon(Icons.close_rounded, color: Colors.white54),
+                    icon: const Icon(Icons.close, color: AppColors.textMuted, size: 20),
+                    visualDensity: VisualDensity.compact,
                   ),
                 ],
               ),
@@ -272,24 +274,24 @@ class _FileSelectorCardState extends State<FileSelectorCard> {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppTheme.radiusSm),
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12),
+          padding: const EdgeInsets.symmetric(vertical: 14),
           decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: color.withValues(alpha: 0.3)),
+            color: AppColors.surfaceElevated,
+            borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+            border: Border.all(color: AppColors.border),
           ),
           child: Column(
             children: [
-              Icon(icon, color: color, size: 22),
+              Icon(icon, color: color, size: 20),
               const SizedBox(height: 6),
               Text(
                 label,
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.9),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
+                style: const TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ],

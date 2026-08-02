@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../theme/app_theme.dart';
+
 class ChunkProgressGrid extends StatelessWidget {
   final int totalChunks;
   final Set<int> receivedIndices;
-
-  static const Color emeraldColor = Color(0xFF10B981);
 
   const ChunkProgressGrid({
     super.key,
@@ -16,15 +16,14 @@ class ChunkProgressGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     if (totalChunks <= 0) return const SizedBox.shrink();
 
-    // Limit grid rendering for extremely large chunk counts so UI remains fast
     final displayCount = totalChunks > 150 ? 150 : totalChunks;
 
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.4),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white10),
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+        border: Border.all(color: AppColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -33,61 +32,48 @@ class ChunkProgressGrid extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Chunk Matrix (${receivedIndices.length} / $totalChunks Received)',
+                'Chunks (${receivedIndices.length}/$totalChunks)',
                 style: const TextStyle(
-                  color: Colors.white70,
+                  color: AppColors.textSecondary,
                   fontSize: 12,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               Row(
                 children: [
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: emeraldColor,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
+                  _legendDot(AppColors.success),
                   const SizedBox(width: 4),
-                  const Text('Captured', style: TextStyle(color: Colors.white54, fontSize: 10)),
+                  const Text(
+                    'Received',
+                    style: TextStyle(color: AppColors.textMuted, fontSize: 10),
+                  ),
                   const SizedBox(width: 10),
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.15),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
+                  _legendDot(AppColors.border),
                   const SizedBox(width: 4),
-                  const Text('Missing', style: TextStyle(color: Colors.white54, fontSize: 10)),
+                  const Text(
+                    'Pending',
+                    style: TextStyle(color: AppColors.textMuted, fontSize: 10),
+                  ),
                 ],
               ),
             ],
           ),
           const SizedBox(height: 10),
           Wrap(
-            spacing: 4,
-            runSpacing: 4,
+            spacing: 3,
+            runSpacing: 3,
             children: List.generate(displayCount, (index) {
               final isReceived = receivedIndices.contains(index);
-              return AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                width: 14,
-                height: 14,
+              return Container(
+                width: 12,
+                height: 12,
                 decoration: BoxDecoration(
-                  color: isReceived ? emeraldColor : Colors.white.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(3),
-                  boxShadow: isReceived
-                      ? [
-                          BoxShadow(
-                            color: emeraldColor.withValues(alpha: 0.6),
-                            blurRadius: 4,
-                          ),
-                        ]
-                      : null,
+                  color: isReceived ? AppColors.success : AppColors.surfaceElevated,
+                  borderRadius: BorderRadius.circular(2),
+                  border: Border.all(
+                    color: isReceived ? AppColors.success : AppColors.border,
+                    width: 0.5,
+                  ),
                 ),
               );
             }),
@@ -96,11 +82,22 @@ class ChunkProgressGrid extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(top: 6),
               child: Text(
-                '+${totalChunks - 150} more chunks...',
-                style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 10),
+                '+${totalChunks - 150} more chunks',
+                style: const TextStyle(color: AppColors.textMuted, fontSize: 10),
               ),
             ),
         ],
+      ),
+    );
+  }
+
+  Widget _legendDot(Color color) {
+    return Container(
+      width: 8,
+      height: 8,
+      decoration: BoxDecoration(
+        color: color,
+        shape: BoxShape.circle,
       ),
     );
   }
